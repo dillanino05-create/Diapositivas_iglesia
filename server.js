@@ -5,13 +5,24 @@ const fs = require("fs");
 const path = require("path");
 const pdfParse = require("pdf-parse");
 const officeParser = require("officeparser");
+const { createClient } = require("@supabase/supabase-js");
 
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
+app.get("/test-db", async (req, res) => {
+  const { data, error } = await supabase.from("canciones").select("*");
 
+  if (error) return res.json(error);
+
+  res.json(data);
+});
 // 🔐 CONTRASEÑA ADMIN
 const PASSWORD = "1234"; // 🔥 cámbiala
 
