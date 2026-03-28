@@ -244,10 +244,48 @@ async function subirArchivo() {
 function mostrarEliminar() {
 
   const cont = document.getElementById("eliminarUI");
+
+  // 🔁 TOGGLE (mostrar / ocultar)
+  if (cont.style.display === "block") {
+    cont.style.display = "none";
+    cont.innerHTML = "";
+    return;
+  }
+
   cont.style.display = "block";
 
-  cont.innerHTML = canciones.map(c => `
-    <div style="margin:5px;">
+  cont.innerHTML = `
+    <input 
+      type="text" 
+      id="buscadorEliminar" 
+      placeholder="Buscar canción a eliminar..."
+      oninput="filtrarEliminar()"
+      style="padding:10px; width:80%; border-radius:10px; border:none; margin:10px;"
+    >
+    <div id="listaEliminar"></div>
+  `;
+}
+function filtrarEliminar() {
+
+  const texto = document.getElementById("buscadorEliminar").value.toLowerCase();
+  const lista = document.getElementById("listaEliminar");
+
+  const filtradas = canciones.filter(c => 
+    c.titulo.toLowerCase().includes(texto)
+  );
+
+  if (filtradas.length === 0) {
+    lista.innerHTML = "<p>No se encontraron canciones</p>";
+    return;
+  }
+
+  lista.innerHTML = filtradas.map(c => `
+    <div style="
+      background:#1e293b;
+      margin:5px;
+      padding:10px;
+      border-radius:10px;
+    ">
       ${c.titulo}
       <button onclick="eliminarCancion(${c.id})">Eliminar</button>
     </div>
