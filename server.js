@@ -203,7 +203,11 @@ app.post("/upload", upload.array("archivo", 20), async (req, res) => {
       return res.status(403).json({ error: "Acceso denegado" });
     }
 
+    const replaceExisting = req.body.replace === "true";
+
     const added = [];
+    const replaced = [];
+    const skipped = [];
     const errors = [];
 
     for (let file of req.files) {
@@ -211,17 +215,11 @@ app.post("/upload", upload.array("archivo", 20), async (req, res) => {
       let cancion = await procesarArchivo(file);
 
       if (cancion) {
+        const resultado = processCancionEnDB(cancion, replaceExisting);
 
-        const { error } = await supabase
-          .from("canciones")
-          .insert([cancion]);
-
-        if (error) {
-          console.log(error);
-          errors.push(cancion.titulo);
-        } else {
-          added.push(cancion.titulo);
-        }
+        if (resultado === "added") added.push(cancion.titulo);
+        else if (resultado === "replaced") replaced.push(cancion.titulo);
+        else skipped.push(cancion.titulo);
 
       } else {
         errors.push(file.originalname);
@@ -230,14 +228,11 @@ app.post("/upload", upload.array("archivo", 20), async (req, res) => {
       fs.unlinkSync(file.path);
     }
 
-    res.json({
-      mensaje: "Canciones guardadas en Supabase",
-      added,
-      errors
-    });
+    guardarDB();
+
+    res.json({ added, replaced, skipped, errors });
 
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Error en subida" });
   }
 });
