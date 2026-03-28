@@ -318,19 +318,10 @@ app.delete("/eliminar/:id", (req, res) => {
 //
 // 📥 obtener canciones
 //
-app.get("/canciones", async (req, res) => {
-
-  const { data, error } = await supabase
-    .from("canciones")
-    .select("*");
-
-  if (error) {
-    console.log(error);
-    return res.status(500).json(error);
-  }
-
-  res.json(data);
+app.get("/canciones", (req, res) => {
+  res.json(cancionesDB);
 });
+
 
 //
 // 🚀 iniciar servidor
